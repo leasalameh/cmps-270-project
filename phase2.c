@@ -221,6 +221,16 @@ int coinTossWithBot(const char *player_name, const char *difficulty);
 int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
 int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
 int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int currentplayer, struct Trie *head);
+int getSpellIndex(const char *spell, char spell[][MAX_SPELL_LENGTH], int numberOfSpells){
+    for (int i=0; i <numberOfSpells; i++){
+        if (strcmp(spell, spells[i] ==0){
+            return i; // return index of the spell 
+        }
+        
+    }
+    return -1; // spell wasnt found 
+}
+}
 
 int main()
 {
@@ -271,6 +281,40 @@ int main()
 
             // 4. TOSS A COIN TO SEE WHO STARTS
             int currentPlayer = coinTossWithBot(player1_name, difficulty);
+            int chosenWords [MAX_SPELL_LENGTH] = {0};
+            char lastChar = 'a';
+            while (1){
+                char currentSpell [MAX_SPELL_LENGTH];
+                // player's turn
+                if (currentPlayer ==0){
+                    special_print("\nYour turn! Enter a spell: ");
+                    scanf("%s", currentSpell);
+                // check if spell is valid 
+                    while (!isSpellValid(currentSpell, spells, numberOfSpells) || chosenWords [getSpellIndex(currentSPell, spells, numberOfspells)] ==1){
+                        special_print("Invalid spell. Enter a valid spell: );
+                            scanf("%s", currentSpell);
+                        
+                    }
+                    // mark chosen word as used 
+                    chosenWords [getSpellIndex(currentSpell, spells, numberOfSpells)] =1;
+                    // update lastChar for next turn (increases chances of winning)
+                    lastChar = currentSpell [strlen(currentSpell) -1];}
+                else {
+                    int botSPellIndex = mediumBot(lastChar, spells, numberOfSpells);
+                    while (chosenWords[botSpellIndex] ==1){
+                        botSpellIndex = mediumBot(lastChar, spells, numberOfSpells);
+                    }
+                    // mark chosen word again 
+                    chosenWords[botSpellIndex] = 1;
+
+                    // display bot spell
+                    printf("\nTom the bot chooses: %s\n", spells [botSpellIndex]);
+                    strcpy(currentSpell, spells[botSpellIndex]);
+                    currentPlayer = 1 - currentPlayer;}
+                }
+                
+            }
+            
 
             break;
         }
