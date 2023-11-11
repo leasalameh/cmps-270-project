@@ -3,26 +3,25 @@
 #include <string.h>
 #include <time.h>
 
-#define CHAR_SIZE 26         // Define the character size
+#define ALPHABET_SIZE 26     // Define the character size
 #define MAX_SPELLS 100       // Maximum number of spells
 #define MAX_MOVES 100        // Maximum number of moves to check for repetition later
 #define MAX_SPELL_LENGTH 100 // Maximum length of a spell
 #define MAX_WORD_LENGTH 100
-#define ALPHABET_SIZE 26
 
 // Data structure to store a Trie node
 struct Trie
 {
     int isLeaf; // 1 when the node is a leaf node
-    struct Trie *character[CHAR_SIZE];
+    struct Trie *character[ALPHABET_SIZE];
 };
 
-// Function that returns a new Trie node
+// Function that creates a new Trie node with default values
 struct Trie *getNewTrieNode()
 {
     struct Trie *node = (struct Trie *)malloc(sizeof(struct Trie));
     node->isLeaf = 0;
-    for (int i = 0; i < CHAR_SIZE; i++)
+    for (int i = 0; i < ALPHABET_SIZE; i++)
     {
         node->character[i] = NULL;
     }
@@ -50,8 +49,7 @@ void insert(struct Trie *head, char *str)
     curr->isLeaf = 1;
 }
 
-// Iterative function to search a string in a Trie. It returns 1
-// if the string is found in the Trie; otherwise, it returns 0.
+// Iterative function to search a string in a Trie. Returns 1 if the string is found in the Trie; and 0 otherwise.
 int search(struct Trie *head, char *str)
 {
     // return 0 if Trie is empty
@@ -84,7 +82,7 @@ int search(struct Trie *head, char *str)
 // Returns 1 if a given Trie node has any children
 int hasChildren(struct Trie *curr)
 {
-    for (int i = 0; i < CHAR_SIZE; i++)
+    for (int i = 0; i < ALPHABET_SIZE; i++)
     {
         if (curr->character[i])
         {
@@ -95,61 +93,57 @@ int hasChildren(struct Trie *curr)
     return 0;
 }
 
-// Recursive function to delete a string from a Trie
 int deletion(struct Trie **curr, char *str)
 {
-    // return 0 if Trie is empty
+    // Base case: If the Trie is empty
     if (*curr == NULL)
     {
+        printf("DEBUG: Trie is empty\n");
         return 0;
     }
 
-    // if the end of the string is not reached
+    // If the end of the string is not reached
     if (*str)
     {
-        // recur for the node corresponding to the next character in
-        // the string and if it returns 1, delete the current node
-        // (if it is non-leaf)
-        if (*curr != NULL && (*curr)->character[*str - 'a'] != NULL &&
-            deletion(&((*curr)->character[*str - 'a']), str + 1) &&
-            (*curr)->isLeaf == 0)
+        int childIndex = *str - 'a';
+
+        // Recur for the node corresponding to the next character in the string
+        if ((*curr)->character[childIndex] != NULL &&
+            deletion(&((*curr)->character[childIndex]), str + 1))
         {
+            // After the recursive call, delete the current node if it is non-leaf
+            if (!hasChildren(*curr) && !(*curr)->isLeaf)
+            {
+                free(*curr);
+                (*curr) = NULL;
+                return 1;
+            }
+        }
+    }
+
+    // If the end of the string is reached
+    if (*str == '\0')
+    {
+        // If the current node is a leaf node
+        if ((*curr)->isLeaf)
+        {
+            // Unmark it as a leaf node (do not delete)
+            (*curr)->isLeaf = 0;
+
+            // If the current node has no children, delete it
             if (!hasChildren(*curr))
             {
                 free(*curr);
                 (*curr) = NULL;
                 return 1;
             }
-            else
-            {
-                return 0;
-            }
-        }
-    }
-
-    // if the end of the string is reached
-    if (*str == '\0' && (*curr)->isLeaf)
-    {
-        // if the current node is a leaf node and doesn't have any children
-        if (!hasChildren(*curr))
-        {
-            free(*curr); // delete the current node
-            (*curr) = NULL;
-            return 1; // delete the non-leaf parent nodes
-        }
-
-        // if the current node is a leaf node and has children
-        else
-        {
-            // mark the current node as a non-leaf node (DON'T DELETE IT)
-            (*curr)->isLeaf = 0;
-            return 0; // don't delete its parent nodes
         }
     }
 
     return 0;
 }
 
+// Depth-First Search to print all words stored in the Trie
 void DFS(struct Trie *node, char *buffer, int depth)
 {
     if (node->isLeaf)
@@ -168,6 +162,7 @@ void DFS(struct Trie *node, char *buffer, int depth)
     }
 }
 
+// Finds missing alphabets in the Trie and stores them in an array
 void findMissingAlphabets(struct Trie *root, char missingAlphabets[], int *missingCount)
 {
     // Check missing alphabets (a to z)
@@ -181,6 +176,7 @@ void findMissingAlphabets(struct Trie *root, char missingAlphabets[], int *missi
     }
 }
 
+// Finds winning words in the Trie based on missing letters
 void findWinningWords(struct Trie *node, const char *suffix, const char *missingLetters, char winningWords[MAX_SPELLS][MAX_WORD_LENGTH], int *count)
 {
     if (node == NULL)
@@ -210,114 +206,7 @@ void findWinningWords(struct Trie *node, const char *suffix, const char *missing
     }
 }
 
-int readSpells(char spells[][MAX_SPELL_LENGTH]);
-void storeWords(struct Trie *head, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
-void displaySpells(char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
-int isSpellValid(char spell[], char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
-int countOccurencies(char spells[][MAX_SPELL_LENGTH], char lastChar, int numberOfSpells);
-void special_print(const char *str);
-void loading_print(const char *str);
-int coinTossWithBot(const char *player_name, const char *difficulty);
-int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
-int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
-int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int currentplayer, struct Trie *head);
-
-int main()
-{
-    // 2. GETTING THE NAME OF THE PLAYER AND CHOOSING THE DIFFICULTY welcome
-    char player1_name[20];
-    char difficulty[7];
-
-    special_print("Welcome to The Spell Game!\n");
-
-    // EXPLAINING THE GAME TO THE PLAYER AND CHOOSING DIFFICULTY.
-    special_print("\nYou will be provided with a list of spells you can choose from.\nYou must continue to cast a spell that is more powerful than the one cast by the other player.\nFor a spell to be more powerful, it should satisfy two requirements:\n1- It should not have been cast during the battle before.\n2- The first character of the spell should be the same as the last character of the spell chosen in the previous round by the other player.\n");
-
-    special_print("\nPlease enter your name (no spaces): ");
-    scanf("%s", player1_name);
-    printf("Hello %s, choose the difficulty level ('easy','medium','hard'): ", player1_name);
-    scanf("%s", difficulty);
-
-    while (1)
-    {
-        if (strcmp("easy", difficulty) == 0)
-        {
-            special_print("You will be playing against Tim the bot.\n");
-            special_print("\nLet's see who's the real SPELL MASTER!\nMay the best player win...\n");
-
-            // 1. READING THE SPELLS FROM THE FILE SPELLS.TXT
-            char spells[MAX_SPELLS][MAX_SPELL_LENGTH];
-            int numberOfSpells = readSpells(spells);
-
-            // 3. DISPLAYING THE SPELLS
-            displaySpells(spells, numberOfSpells);
-
-            // 4. TOSS A COIN TO SEE WHO STARTS
-            int currentPlayer = coinTossWithBot(player1_name, difficulty);
-
-            break;
-        }
-        else if (strcmp("medium", difficulty) == 0)
-        {
-            special_print("You will be playing against Tom the bot.\n");
-            special_print("\nLet's see who's the real SPELL MASTER...\nMay the best player win...\n");
-
-            // 1. READING THE SPELLS FROM THE FILE SPELLS.TXT
-            char spells[MAX_SPELLS][MAX_SPELL_LENGTH];
-            int numberOfSpells = readSpells(spells);
-
-            // 3. DISPLAYING THE SPELLS
-            displaySpells(spells, numberOfSpells);
-
-            // 4. TOSS A COIN TO SEE WHO STARTS
-            int currentPlayer = coinTossWithBot(player1_name, difficulty);
-
-            break;
-        }
-        else if (strcmp("hard", difficulty) == 0)
-        {
-            special_print("You will be playing against Bob the bot.\n");
-            special_print("\nLet's see who's the real SPELL MASTER...\nMay the best player win...\n");
-
-            // 1. READING THE SPELLS FROM THE FILE SPELLS.TXT
-            char spells[MAX_SPELLS][MAX_SPELL_LENGTH];
-            int numberOfSpells = readSpells(spells);
-
-            // 3. DISPLAYING THE SPELLS
-            displaySpells(spells, numberOfSpells);
-
-            // 4. TOSS A COIN TO SEE WHO STARTS
-            int currentPlayer = coinTossWithBot(player1_name, difficulty);
-
-            //
-            char missingLetters[26];
-            struct Trie *head = getNewTrieNode();
-            storeWords(head, spells, numberOfSpells);
-            int missingCount = 0;
-            findMissingAlphabets(head, missingLetters, &missingCount);
-            char winningWords[MAX_SPELLS][MAX_WORD_LENGTH];
-            int count = 0;
-
-            findWinningWords(head, "", missingLetters, winningWords, &count);
-            printf("Winning Words:\n");
-            for (int i = 0; i < count; ++i)
-            {
-                printf("%s\n", winningWords[i]);
-            }
-
-            break;
-        }
-        else
-        {
-            special_print("Invalid difficulty level. Please choose 'easy', 'medium', or 'hard': ");
-            scanf("%s", difficulty);
-        }
-    }
-
-    return 0;
-}
-
-// 1. READS A FILE CALLED SPELLS.TXT
+// Reads spells from file "spells.txt", returns the number of spells, and populates the spells array
 int readSpells(char spells[][MAX_SPELL_LENGTH])
 {
     FILE *fptr = fopen("spells.txt", "r"); // A pointer to our file that we open and read (r=read mode)
@@ -341,6 +230,8 @@ int readSpells(char spells[][MAX_SPELL_LENGTH])
     return numberOfSpells;
 }
 
+// Stores words from the file in the Trie data structure
+// Reads spells from "spells.txt" and inserts them into the Trie
 void storeWords(struct Trie *head, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
     FILE *fptr = fopen("spells.txt", "r");
@@ -372,7 +263,8 @@ void storeWords(struct Trie *head, char spells[][MAX_SPELL_LENGTH], int numberOf
 
     fclose(fptr);
 }
-// 3. DISPLAYS THE SPELLS AS A TABLE (5 WORDS PER LINE)
+
+// Displays spells in a formatted table (5 words per line)
 void displaySpells(char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
     special_print("\nHere is the list of Spells... Choose wisely:\n");
@@ -386,7 +278,7 @@ void displaySpells(char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
     }
 }
 
-// 6. CHECKS IF A SPELL IS VALID (IF IT EXISTS IN THE FILE)
+// Checks if a spell is valid (exists in the list of spells). Returns 1 if the spell is valid, 0 otherwise
 int isSpellValid(char spell[], char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
     for (int i = 0; i < numberOfSpells; i++)
@@ -399,7 +291,7 @@ int isSpellValid(char spell[], char spells[][MAX_SPELL_LENGTH], int numberOfSpel
     return 0; // Spell is not valid
 }
 
-// 6. CHECKS IF A SPELL STARTING WITH THE LAST CHAR IS STILL AVAILABLE
+// Counts occurences of spells in the list starting with a given character
 int countOccurencies(char spells[][MAX_SPELL_LENGTH], char lastChar, int numberOfSpells)
 {
     int count = 0;
@@ -416,7 +308,7 @@ int countOccurencies(char spells[][MAX_SPELL_LENGTH], char lastChar, int numberO
     return count;
 }
 
-// PRINT THE CHARACTERS ONE BY ONE
+// Prints characters one by one to simulate a special effect
 void special_print(const char *str)
 {
     int i = 0;
@@ -424,12 +316,12 @@ void special_print(const char *str)
     {
         putchar(str[i]);
         fflush(stdout);
-        // usleep(50000); // CONTROLS THE SPEED
+        // usleep(60000); // CONTROLS THE SPEED
         i++;
     }
 }
 
-// PRINT THE CHARACTERS ONE BY ONE (slowly)
+// Prints characters one by one slowly to simulate loading
 void loading_print(const char *str)
 {
     int i = 0;
@@ -437,12 +329,12 @@ void loading_print(const char *str)
     {
         putchar(str[i]);
         fflush(stdout);
-        // usleep(400000); // CONTROLS THE SPEED
+        usleep(600000); // CONTROLS THE SPEED
         i++;
     }
 }
 
-// 4 TOSSING A COIN AND SAYING WHO WILL START
+// Tosses a coin and returns the player (0=player or 1=bot) who starts
 int coinTossWithBot(const char *player_name, const char *difficulty)
 {
     char player1_coin[6];
@@ -493,39 +385,181 @@ int coinTossWithBot(const char *player_name, const char *difficulty)
 
 int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
+    return 0;
 }
 
 int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
+    return 0;
 }
 
-// int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int currentplayer, struct Trie *head)
-// {
-//     int move = 0;
-//     char missingLetters[26];
-//     struct Trie *head = getNewTrieNode();
-//     storeWords(head, spells, numberOfSpells);
-//     int missingCount = 0;
-//     findMissingAlphabets(head, missingLetters, &missingCount);
-//     char *winning_Words[];
-//     findWordWithMissingCharacter();
-//     if (currentplayer == 1)
-//     {
-//         if (winning_Words != NULL)
-//         {
-//             const char *WORD[] = winning_Words[0];
-//             for (int i = 0; i < sizeof(spells); i++)
-//             {
-//                 if (strcmp(spells[i], WORD) == 0)
-//                     move = i;
-//             }
-//         }
-//         else
-//         {
-//         }
-//         return move;
-//     }
-//     else
-//     {
-//     }
-// }
+int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int startingPlayer, struct Trie *head)
+{
+    // move = index of the spell chosen by the bot (spells[hardbot()] in the main)
+    int move = 0;
+    char missingLetters[26];
+    // find,  if there are, letters of the alphabet that are not used to start a word.
+    int missingCount = 0;
+    findMissingAlphabets(head, missingLetters, &missingCount);
+    // array of winning words, if there are (they end with the missing letters)
+    char winningWords[MAX_SPELLS][MAX_WORD_LENGTH];
+    int count = 0;
+    findWinningWords(head, "", missingLetters, winningWords, &count);
+
+    if (startingPlayer == 1 && count > 0)
+    {
+        const char *WORD = winningWords[0];
+        for (int i = 0; i < numberOfSpells; i++)
+        {
+            if (strcmp(spells[i], WORD) == 0)
+            {
+                move = i;
+                break;
+            }
+        }
+        return move;
+    }
+    else if (startingPlayer == 1 && count == 0)
+    {
+    }
+    return 0;
+}
+
+int main()
+{
+    // 2. GETTING THE NAME OF THE PLAYER AND CHOOSING THE DIFFICULTY welcome
+    char player1_name[20];
+    char difficulty[7];
+
+    special_print("Welcome to The Spell Game!\n");
+
+    // EXPLAINING THE GAME TO THE PLAYER AND CHOOSING DIFFICULTY.
+    special_print("\nYou will be provided with a list of spells you can choose from.\nYou must continue to cast a spell that is more powerful than the one cast by the other player.\nFor a spell to be more powerful, it should satisfy two requirements:\n1- It should not have been cast during the battle before.\n2- The first character of the spell should be the same as the last character of the spell chosen in the previous round by the other player.\n");
+
+    special_print("\nPlease enter your name (no spaces): ");
+    scanf("%s", player1_name);
+    printf("Hello %s, choose the difficulty level ('easy','medium','hard'): ", player1_name);
+    scanf("%s", difficulty);
+
+    while (1)
+    {
+        if (strcmp("easy", difficulty) == 0 || strcmp("medium", difficulty) == 0 || strcmp("hard", difficulty) == 0)
+        {
+            special_print("You will be playing against Bob the bot.\n");
+            special_print("\nLet's see who's the real SPELL MASTER...\nMay the best player win...\n");
+
+            // 1. READING THE SPELLS FROM THE FILE SPELLS.TXT
+            char spells[MAX_SPELLS][MAX_SPELL_LENGTH];
+            int numberOfSpells = readSpells(spells);
+
+            // 3. DISPLAYING THE SPELLS
+            displaySpells(spells, numberOfSpells);
+
+            // 4. TOSS A COIN TO SEE WHO STARTS
+            int currentPlayer = coinTossWithBot(player1_name, difficulty);
+            int startingPlayer = currentPlayer;
+
+            // play the game (player vs bot)
+            int gameOver = 0;
+            int winner = -1; // 0 for player 1, 1 for player 2
+            char currentSpell[50];
+            char lastChar = '\0'; // Initialize the last character to an arbitrary value
+
+            // create a trie
+            struct Trie *head = getNewTrieNode();
+
+            // store the words of the file in the trie
+            storeWords(head, spells, numberOfSpells);
+
+            // Initialize moves array to store player moves
+            char moves[MAX_MOVES][MAX_SPELL_LENGTH];
+            int moveCount = 0;
+
+            while (!gameOver)
+            {
+                if (currentPlayer == 0)
+                {
+                    printf("%s chooses: ", player1_name);
+                    scanf("%s", currentSpell);
+                }
+                else if (currentPlayer == 1)
+                {
+                    if (strcmp("easy", difficulty) == 0)
+                    {
+                        strcpy(currentSpell, spells[easyBot(lastChar, spells, numberOfSpells)]);
+                    }
+                    else if (strcmp("medium", difficulty) == 0)
+                    {
+                        strcpy(currentSpell, spells[mediumBot(lastChar, spells, numberOfSpells)]);
+                    }
+                    else if (strcmp("hard", difficulty) == 0)
+                    {
+                        strcpy(currentSpell, spells[hardBot(lastChar, spells, numberOfSpells, startingPlayer, head)]);
+                    }
+                    printf("Bob chooses: %s\n", currentSpell);
+                }
+                if (!isSpellValid(currentSpell, spells, numberOfSpells)) // Checking if spell is valid
+                {
+                    printf("\nInvalid spell... (not in the list)\n%s wins by default!\n", currentPlayer == 0 ? "Bob" : player1_name); // Opponent entered an spell not in the provided list
+                    winner = 1 - currentPlayer;                                                                                       // Switch winner
+                    gameOver = 1;
+                }
+                else if (moveCount > 0 && currentSpell[0] != lastChar) // Opponent chooses a spell in which the first character doesn't match the last character of the previous spell
+                {
+                    printf("\nInvalid spell... The first character of the spell does not match the last character of the previous one\n%s wins by default!\n", (currentPlayer == 0) ? "Bob" : player1_name);
+                    winner = 1 - currentPlayer; // Switch winner
+                    gameOver = 1;
+                }
+                else
+                {
+                    // Check if the current player repeated a spell
+                    for (int i = 0; i < moveCount; i++)
+                    {
+                        if (strcmp(currentSpell, moves[i]) == 0)
+                        {
+                            printf("\nInvalid spell... %s repeated a previously cast spell...\n%s wins!\n", currentPlayer == 0 ? player1_name : "Bob", currentPlayer == 0 ? "Bob" : player1_name); // Opponent repeated a spell
+                            winner = 1 - currentPlayer;                                                                                                                                            // Switch winner
+                            gameOver = 1;
+                            break;
+                        }
+                    }
+
+                    // Store the current player's move
+                    strcpy(moves[moveCount], currentSpell);
+                    moveCount++;
+
+                    // Update the last character
+                    lastChar = currentSpell[strlen(currentSpell) - 1];
+
+                    // Check if the opponent has no valid spells left BEFORE SWITCHING PLAYERS
+                    int words_USED_startingWithLastChar = countOccurencies(moves, lastChar, moveCount);          // Count how many spells start with the last character in the MOVES (already casted spells)
+                    int words_inTOTAL_startingWithLastChar = countOccurencies(spells, lastChar, numberOfSpells); // Count how many spells start with the last character in the file (total number of spells)
+                    if (words_USED_startingWithLastChar == words_inTOTAL_startingWithLastChar)                   // If the number is = then opponent wins, no switching players (there are no available words left that start with last char)
+                    {
+                        printf("\n%s has no valid spells left.\n%s wins by default!\n", currentPlayer == 0 ? "Bob" : player1_name, currentPlayer == 0 ? player1_name : "Bob"); // Opponent has no valid spells left
+                        winner = 1 - currentPlayer;                                                                                                                            // Switch winner
+                        gameOver = 1;
+                    }
+                    else
+                    {
+                        currentPlayer = 1 - currentPlayer;
+                    }
+                }
+                if (head != NULL)
+                {
+                    int deleted = deletion(&head, currentSpell);
+                }
+            }
+            // 7. ENDING THE GAME (NO TIES) AND ANNOUNCING THE WINNER
+            printf("\nGAME OVER...\nCongratulations %s! You are the SPELL MASTER!\n", winner == 0 ? "Bob" : player1_name);
+            break;
+        }
+        else
+        {
+            special_print("Invalid difficulty level. Please choose 'easy', 'medium', or 'hard': ");
+            scanf("%s", difficulty);
+        }
+    }
+
+    return 0;
+}
