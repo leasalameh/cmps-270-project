@@ -480,7 +480,7 @@ int main()
             {
                 if (currentPlayer == 0)
                 {
-                    printf("%s chooses: ", player1_name);
+                    printf("Your turn to choose: ");
                     scanf("%s", currentSpell);
                 }
                 else if (currentPlayer == 1)
@@ -501,7 +501,7 @@ int main()
                 }
                 if (!isSpellValid(currentSpell, spells, numberOfSpells)) // Checking if spell is valid
                 {
-                    printf("\nInvalid spell... (not in the list)\n%s wins by default!\n", currentPlayer == 0 ? "Bob" : player1_name); // Opponent entered an spell not in the provided list
+                    printf("\nInvalid spell... (not in the list)\n%s wins!!\n", currentPlayer == 0 ? "Bob" : player1_name); // Opponent entered an spell not in the provided list
                     winner = 1 - currentPlayer;                                                                                       // Switch winner
                     gameOver = 1;
                 }
