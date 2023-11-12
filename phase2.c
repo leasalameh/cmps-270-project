@@ -291,7 +291,7 @@ int main()
                     scanf("%s", currentSpell);
                 // check if spell is valid 
                     while (!isSpellValid(currentSpell, spells, numberOfSpells) || chosenWords [getSpellIndex(currentSpell, spells, numberOfSpells)] ==1){
-                        special_print("Invalid spell. Enter a valid spell:" );
+                        special_print("Invalid spell. Enter a valid spell: " );
                             scanf("%s", currentSpell);
                         
                     }
@@ -539,12 +539,9 @@ int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
 }
 
-int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int chosenWords[])
+int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int chosenWords[], char winningWords[MAX_SPELLS][MAX_WORD_LENGTH], int *count)
 {
-    char winningWords[MAX_SPELLS][MAX_WORD_LENGTH];
-    // keeping track of the next move 
-    static int nextMoveIndex = 0;
-    // spells that meet the criteria
+   
     int validSpells[MAX_SPELLS];
     int validCount = 0;
     
@@ -557,15 +554,13 @@ int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells
     }
 
     // try choosing a winning word based on the last char
-    for (int i = 0; i < validCount; i++)
+    for (int i = 0; i < *count; i++)
     {
-        if (winningWords[i][0] == lastChar)
+        if (winningWords[i][0] == lastChar && chosenWords[i] ==0)
         {
             // mark as chosen so not used later
-            strcpy(spells[nextMoveIndex], winningWords[i]);
-            chosenWords[nextMoveIndex] = 1;
-            nextMoveIndex++;
-            return nextMoveIndex - 1;
+            chosenWords[i] = 1;
+            return i;
         }
     }
 
@@ -573,11 +568,9 @@ int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells
     for (int i = 0; i < validCount; i++)
     {
         chosenWords[validSpells[i]] = 1;
-        nextMoveIndex = validSpells[i] + 1;
         return validSpells[i];
     }
-nextMoveIndex = validSpells[0] + 1;
-    return -1;
+    return -1; // no valid move found 
 }
 
 
