@@ -219,11 +219,11 @@ void special_print(const char *str);
 void loading_print(const char *str);
 int coinTossWithBot(const char *player_name, const char *difficulty);
 int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
-int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells);
+int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, char winningWords[], int *count);
 int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int currentplayer, struct Trie *head);
-int getSpellIndex(const char *spell, char spell[][MAX_SPELL_LENGTH], int numberOfSpells){
+int getSpellIndex(const char *spell, char Spells[][MAX_SPELL_LENGTH], int numberOfSpells){
     for (int i=0; i <numberOfSpells; i++){
-        if (strcmp(spell, spells[i] ==0){
+        if (strcmp(spell, Spells[i] ==0)){
             return i; // return index of the spell 
         }
         
