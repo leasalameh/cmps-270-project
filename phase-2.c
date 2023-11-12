@@ -569,6 +569,7 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
         }
         else
         {
+            //not done yet
         }
     }
     return 0;
