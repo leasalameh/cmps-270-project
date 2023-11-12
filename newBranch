@@ -691,6 +691,45 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
         }
         else
         {
+            char startingLetter = lastChar;
+            char words_starting_with_lastChar[MAX_SPELLS][MAX_SPELL_LENGTH];
+            int countOf_startingWords = 0;
+            findWordsStartingWith(head, "", lastChar, words_starting_with_lastChar, &countOf_startingWords);
+
+            // Choose a word with specific starting and ending letter counts
+            int StartEvenEnd = -1, StartOddEnd = -1;
+
+            for (int i = 0; i < countOf_startingWords; i++)
+            {
+                const char *word = words_starting_with_lastChar[i];
+                int endCount = countOccurrencesInTrie(head, word[strlen(word) - 1]);
+
+                if (endCount % 2 == 0)
+                {
+                    StartEvenEnd = i;
+                    break;
+                }
+                else if (endCount % 2 == 1)
+                {
+                    StartOddEnd = i;
+                }
+            }
+
+            // Prioritize the selection based on the conditions
+            if (StartEvenEnd != -1)
+            {
+                move = oddStartEvenEnd;
+            }
+            else if (StartOddEnd != -1)
+            {
+                move = oddStartOddEnd;
+            }
+            else
+            {
+                // No word found with the specified conditions, choose any valid word
+                move = rand() % numberOfSpells;
+            }
+            return move;
         }
     }
     return 0;
