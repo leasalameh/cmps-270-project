@@ -234,6 +234,8 @@ int getSpellIndex(const char *spell, char Spells[][MAX_SPELL_LENGTH], int number
 
 int main()
 {
+    int *count;
+    
     // 2. GETTING THE NAME OF THE PLAYER AND CHOOSING THE DIFFICULTY welcome
     char player1_name[20];
     char difficulty[7];
@@ -524,7 +526,7 @@ int coinTossWithBot(const char *player_name, const char *difficulty)
 
     if ((coinToss == 0 && strcmp(player1_coin, "heads") == 0) || (coinToss == 1 && strcmp(player1_coin, "tails") == 0))
     {
-        printf("\nYou are going to start.\n\n", player_name);
+        printf(" %s \nYou are going to start.\n\n ", player_name);
     }
     else
     {
