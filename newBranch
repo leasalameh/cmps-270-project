@@ -4,15 +4,15 @@
 #include <time.h>
 
 #define ALPHABET_SIZE 26     // Define the character size
-#define MAX_SPELLS 100       // Maximum number of spells
-#define MAX_SPELL_LENGTH 100 // Maximum length of a spell
+#define MAX_SPELLS 200       // Maximum number of spells
+#define MAX_SPELL_LENGTH 200 // Maximum length of a spell
 
 // Data structure to store a Trie node
 struct Trie
 {
     struct Trie *character[ALPHABET_SIZE];
     int isLeaf; // 1 when the node is a leaf node
-};
+}; 
 
 // Function that creates a new Trie node with default values
 struct Trie *getNewTrieNode()
@@ -35,12 +35,12 @@ void insert(struct Trie *head, char *str)
     struct Trie *curr = head;
     while (*str)
     {
-        if (curr->character[*str - 'a'] == NULL)
+        if (curr->character[*str - 'a'] == NULL) //get the char
         {
             curr->character[*str - 'a'] = getNewTrieNode();
             if (curr->character[*str - 'a'] == NULL)
             {
-                fprintf(stderr, "Memory allocation error\n");
+                fprintf(stderr, "Memory allocation error\n"); 
                 exit(EXIT_FAILURE);
             }
         }
@@ -66,7 +66,7 @@ int search(struct Trie *head, char *str)
         curr = curr->character[*str - 'a'];
 
         // if the string is invalid (reached end of a path in the Trie)
-        if (curr == NULL)
+        if (curr == NULL) //there are no more words with this character
         {
             return 0;
         }
@@ -158,7 +158,7 @@ void findMissingAlphabets(struct Trie *root, char missingAlphabets[], int *missi
     }
 }
 
-// Finds winning words in the Trie based on missing letters
+// Finds winning words in the Trie based on missing letters, missing letters means that if a word ends with this letter, there is no move left. 
 void findWinningWords(struct Trie *node, const char *suffix, const char *missingLetters, char winningWords[MAX_SPELLS][MAX_SPELL_LENGTH], int *count)
 {
     if (node == NULL)
@@ -188,6 +188,7 @@ void findWinningWords(struct Trie *node, const char *suffix, const char *missing
     }
 }
 
+//Finds words starting with a specific character, so that it would be easy to search for words starting with that letter
 void findWordsStartingWith(struct Trie *node, const char *prefix, char startingChar, char words[MAX_SPELLS][MAX_SPELL_LENGTH], int *count)
 {
     if (node == NULL)
@@ -451,7 +452,7 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
     int move = 0;
     char missingLetters[26];
     // find,  if there are, letters of the alphabet that are not used to start a word.
-    int missingCount = 0;
+    int missingCount = 0; //count how many are missing
     findMissingAlphabets(head, missingLetters, &missingCount);
     // array of winning words, if there are (they end with the missing letters)
     char winningWords[MAX_SPELLS][MAX_SPELL_LENGTH];
@@ -465,8 +466,10 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
         const char *WORD = winningWords[0];
         for (int i = 0; i < numberOfSpells; i++)
         {
+    //Check if the current spell is equal to WORD
             if (strcmp(spells[i], WORD) == 0)
             {
+      //If a match is found, set the move variable to the current index and exit the loop
                 move = i;
                 break;
             }
@@ -476,13 +479,14 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
 
     else if (startingPlayer == 1 && count == 0)
     {
+   // Declare and initialize an array to store the counts of each letter in the alphabet
         int letterCounts[ALPHABET_SIZE] = {0};
 
         for (int i = 0; i < ALPHABET_SIZE; i++)
         {
             letterCounts[i] = 0;
         }
-
+  // Call function to count words starting with each letter and update letterCounts
         countWordsStartingWithEachLetter(head, letterCounts);
 
         char twoWords[MAX_SPELLS][MAX_SPELL_LENGTH];
@@ -510,6 +514,7 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
                 }
             }
         }
+   //if there is a match, we use the word
         if (MatchCount == 1)
         {
             for (int i = 0; i < numberOfSpells; i++)
@@ -523,17 +528,17 @@ int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, 
             return move;
         }
 
-        // choose word with odd count but it should end with word with even count
+        // choose word with odd count but it should end with word with even count, or start with odd and ends with odd or starts with even and ends with even or starts with even and ends in odd
         // Choose a word with specific starting and ending letter counts
         int oddStartEvenEnd = -1, oddStartOddEnd = -1, evenStartOddEnd = -1, evenStartEvenEnd = -1;
 
         for (int i = 0; i < numberOfSpells; i++)
         {
             const char *word = spells[i];
-            int startCount = countOccurrencesInTrie(head, word[0]);
-            int endCount = countOccurrencesInTrie(head, word[strlen(word) - 1]);
+            int startCount = countOccurrencesInTrie(head, word[0]); //take the first character
+            int endCount = countOccurrencesInTrie(head, word[strlen(word) - 1]); //take the last character
 
-            if (startCount % 2 == 1 && endCount % 2 == 0)
+            if (startCount % 2 == 1 && endCount % 2 == 0) 
             {
                 oddStartEvenEnd = i;
                 break;
@@ -750,7 +755,7 @@ int main()
             {
                 if (currentPlayer == 0)
                 {
-                    printf("%s chooses: ", player1_name);
+                    printf("You choose: ");
                     scanf("%s", currentSpell);
                 }
                 else if (currentPlayer == 1)
