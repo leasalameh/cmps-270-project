@@ -1,0 +1,237 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_SPELLS 100
+#define MAX_SPELL_LENGTH 30
+#define MAX_PLAYERS 2
+#define MAX_MOVES 200
+
+// Function to read spells from a file
+int readSpells(char spells[MAX_SPELLS][MAX_SPELL_LENGTH], const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file '%s'. Exiting.\n", filename);
+        exit(1);
+    }
+
+    int numSpells;
+    fscanf(file, "%d", &numSpells);
+    fgetc(file); // Consume the newline character
+
+    for (int i = 0; i < numSpells; i++) {
+        fgets(spells[i], MAX_SPELL_LENGTH, file);
+        // Remove the trailing newline character
+        spells[i][strcspn(spells[i], "\n")] = '\0';
+    }
+
+    fclose(file);
+    return numSpells;
+}
+
+// Function to display spells as a table
+void displaySpells(char spells[MAX_SPELLS][MAX_SPELL_LENGTH], int numSpells) {
+    printf("\nHere is the list of Spells... Choose wisely:\n");
+    for (int i = 0; i < numSpells; i++) {
+        printf("%-20s", spells[i]);                      // Using width to implement aligned columns
+        if ((i + 1) % 5 == 0 || i == numSpells - 1)      // Because 5 words per line or last word
+        {
+            printf("\n");
+        }
+    }
+    printf("\n");
+}
+
+// Function to check if a word is repeated
+int isRepeated(char word[MAX_SPELL_LENGTH], char moves[MAX_MOVES][MAX_SPELL_LENGTH], int numMoves) {
+    for (int i = 0; i < numMoves; i++) {
+        if (strcmp(word, moves[i]) == 0) {
+            return 1; // Word is repeated
+        }
+    }
+    return 0; // Word is not repeated
+}
+
+// Function for the bot to choose the first move
+int botFirstMove(char spells[MAX_SPELLS][MAX_SPELL_LENGTH], char moves[MAX_MOVES][MAX_SPELL_LENGTH], int *numMoves) {
+    int available[MAX_SPELLS];
+    int numAvailable = 0;
+
+    // Find available spells
+    for (int i = 0; i < MAX_SPELLS; i++) {
+        if (!isRepeated(spells[i], moves, *numMoves)) {
+            available[numAvailable++] = i;
+        }
+    }
+
+    if (numAvailable > 0) {
+        // Choose a random word from the available spells
+        int chosenIndex = available[rand() % numAvailable];
+        strcpy(moves[*numMoves], spells[chosenIndex]);
+        printf("Bot: %s\n", moves[*numMoves]); // Display the bot's move
+        (*numMoves)++;
+        return chosenIndex;
+    } else {
+        printf("No available spells. Bot forfeits the turn.\n");
+        return -1; // Bot forfeits the turn
+    }
+}
+
+// Function for the bot to choose a move
+int easyBot(char lastChar, char spells[MAX_SPELLS][MAX_SPELL_LENGTH], char moves[MAX_MOVES][MAX_SPELL_LENGTH], int *numMoves, int startingPlayer) {
+    char words_starting_with_last_characters[MAX_SPELLS][MAX_SPELL_LENGTH];
+    int numPossibilities = 0;
+
+    // Find available spells based on the last character of the previous move
+    for (int i = 0; i < MAX_SPELLS; i++) {
+        if (spells[i][0] == lastChar && !isRepeated(spells[i], moves, *numMoves)) {
+            strcpy(words_starting_with_last_characters[numPossibilities++], spells[i]);
+        }
+    }
+
+    // Create an array of available words
+    char available_words[MAX_SPELLS][MAX_SPELL_LENGTH];
+    int numAvailableWords = 0;
+
+    for (int i = 0; i < MAX_SPELLS; i++) {
+        if (!isRepeated(spells[i], moves, *numMoves)) {
+            strcpy(available_words[numAvailableWords++], spells[i]);
+        }
+    }
+
+    // Check if there are available words starting with the last character
+    if (numPossibilities > 0) {
+        // Choose a random word from the possibilities
+        int chosenIndex = rand() % numPossibilities;
+        strcpy(moves[*numMoves], words_starting_with_last_characters[chosenIndex]);
+        printf("Bot: %s\n", moves[*numMoves]); // Display the bot's move
+        (*numMoves)++;
+        return chosenIndex;
+    } else {
+        // No available spells, end the game
+        printf("No available spells. Player wins!\n");
+        return -1;
+    }
+}
+
+int main() {
+    srand(time(NULL));
+
+    char spells[MAX_SPELLS][MAX_SPELL_LENGTH];
+    int numSpells = readSpells(spells, "spells.txt");
+
+    char player[MAX_PLAYERS][MAX_SPELL_LENGTH];
+    printf("Enter Player 1's name (no spaces): ");
+    scanf("%s", player[0]);
+
+    displaySpells(spells, numSpells);
+
+    int currentPlayer = 0; // 0 for player, 1 for bot
+    int winner = -1;
+
+    char moves[MAX_MOVES][MAX_SPELL_LENGTH];
+    int numMoves = 0;
+
+    // First move
+    if (currentPlayer == 0) {
+        int playerIndex = -1;
+        while (playerIndex == -1) {
+            printf("%s, enter your spell: ", player[0]);
+            char chosenSpell[MAX_SPELL_LENGTH];
+            scanf("%s", chosenSpell);
+
+            if (!isRepeated(chosenSpell, moves, numMoves)) {
+                int validMove = 0;
+                for (int i = 0; i < numSpells; i++) {
+                    if (strcmp(chosenSpell, spells[i]) == 0) {
+                        validMove = 1;
+                        break;
+                    }
+                }
+
+                if (numMoves > 0 && moves[numMoves - 1][strlen(moves[numMoves - 1]) - 1] != chosenSpell[0]) {
+                    printf("Invalid spell! %s loses for mismatched first and last characters.\n", player[0]);
+                    winner = 1; // Player wins
+                    break;
+                }
+
+                if (validMove) {
+                    strcpy(moves[numMoves], chosenSpell);
+                    printf("Player: %s\n", moves[numMoves]); // Display the player's move
+                    numMoves++;
+                    playerIndex = 0;
+                } else {
+                    printf("Invalid spell! %s loses for choosing a word not in the list.\n", player[0]);
+                    winner = 1; // Player wins
+                    break;
+                }
+            } else {
+                printf("Invalid spell! %s loses for repeating a spell.\n", player[0]);
+                winner = 1; // Player wins
+                break;
+            }
+        }
+    } else {
+        int botIndex = botFirstMove(spells, moves, &numMoves);
+        if (botIndex == -1) {
+            winner = 0; // Player wins, as the bot forfeits the turn
+        }
+    }
+
+    // Main game loop
+    while (winner == -1) {
+        currentPlayer = 1 - currentPlayer; // Switch players
+
+        if (currentPlayer == 0) {
+            int playerIndex = -1;
+            while (playerIndex == -1) {
+                printf("%s, enter your spell: ", player[0]);
+                char chosenSpell[MAX_SPELL_LENGTH];
+                scanf("%s", chosenSpell);
+
+                if (!isRepeated(chosenSpell, moves, numMoves)) {
+                    int validMove = 0;
+                    for (int i = 0; i < numSpells; i++) {
+                        if (strcmp(chosenSpell, spells[i]) == 0) {
+                            validMove = 1;
+                            break;
+                        }
+                    }
+
+                    if (numMoves > 0 && moves[numMoves - 1][strlen(moves[numMoves - 1]) - 1] != chosenSpell[0]) {
+                        printf("Invalid spell! %s loses for mismatched first and last characters.\n", player[0]);
+                        winner = 1; // Player wins
+                        break;
+                    }
+
+                    if (validMove) {
+                        strcpy(moves[numMoves], chosenSpell);
+                        printf("Player: %s\n", moves[numMoves]); // Display the player's move
+                        numMoves++;
+                        playerIndex = 0;
+                    } else {
+                        printf("Invalid spell! %s loses for choosing a word not in the list.\n", player[0]);
+                        winner = 1; // Player wins
+                        break;
+                    }
+                } else {
+                    printf("Invalid spell! %s loses for repeating a spell.\n", player[0]);
+                    winner = 1; // Player wins
+                    break;
+                }
+            }
+        } else {
+            int botIndex = easyBot(moves[numMoves - 1][strlen(moves[numMoves - 1]) - 1], spells, moves, &numMoves, currentPlayer);
+            if (botIndex == -1) {
+                winner = 0; // Player wins, as the bot forfeits the turn
+                break;
+            }
+        }
+    }
+
+    printf("Congratulations, %s wins!\n", winner == 0 ? player[0] : winner == 0 ? player[0] : "Bot");
+
+    return 0;
+}
+
