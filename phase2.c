@@ -290,7 +290,7 @@ int main()
                     special_print("\nYour turn! Enter a spell: ");
                     scanf("%s", currentSpell);
                 // check if spell is valid 
-                    while (!isSpellValid(currentSpell, spells, numberOfSpells) || chosenWords [getSpellIndex(currentSPell, spells, numberOfspells)] ==1){
+                    while (!isSpellValid(currentSpell, spells, numberOfSpells) || chosenWords [getSpellIndex(currentSpell, spells, numberOfSpells)] ==1){
                         special_print("Invalid spell. Enter a valid spell:" );
                             scanf("%s", currentSpell);
                         
@@ -300,7 +300,7 @@ int main()
                     // update lastChar for next turn (increases chances of winning)
                     lastChar = currentSpell [strlen(currentSpell) -1];}
                 else {
-                    int botSPellIndex = mediumBot(lastChar, spells, numberOfSpells);
+                    int botSpellIndex = mediumBot(lastChar, spells, numberOfSpells);
                     while (chosenWords[botSpellIndex] ==1){
                         botSpellIndex = mediumBot(lastChar, spells, numberOfSpells);
                     }
@@ -539,38 +539,47 @@ int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 {
 }
 
-int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
-{char winningWords[MAX_SPELLS][MAX_WORD_LENGTH];
- int count =0;
+int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int chosenWords[])
+{
+    char winningWords[MAX_SPELLS][MAX_WORD_LENGTH];
     // keeping track of the next move 
-    static int nextMoveIndex=0;
-    // spells thet meet the criteria
+    static int nextMoveIndex = 0;
+    // spells that meet the criteria
     int validSpells[MAX_SPELLS];
-    int validCount =0;
+    int validCount = 0;
     
-    for (int i=0; i <numberOfSpells; i++){
-        if (spells[i][0] == lastChar && chosenWords[i] ==0){
+    for (int i = 0; i < numberOfSpells; i++)
+    {
+        if (spells[i][0] == lastChar && chosenWords[i] == 0)
+        {
             validSpells[validCount++] = i;
         }
     }
+
     // try choosing a winning word based on the last char
-    for (int i=0; i < *winningCOunt ; i++){
-        if (winningWord[i][0] == lastchar){
+    for (int i = 0; i < validCount; i++)
+    {
+        if (winningWords[i][0] == lastChar)
+        {
             // mark as chosen so not used later
-            strcpy (spells[nextMoveIndex], winningWords[i]);
-            chosenWords[nextMoveIndex] =1;
+            strcpy(spells[nextMoveIndex], winningWords[i]);
+            chosenWords[nextMoveIndex] = 1;
             nextMoveIndex++;
-            return nextMoveIndex -1;
+            return nextMoveIndex - 1;
         }
     }
-   
-// if no winning word is available chose valid spell
-    for (int i=0; i <validCount; i++){
-        chosenWords[validSpells[i]] =1;
-         nextMoveIndex = validSpells[i] +1;
-        return validSpells[i];}
-    return -1;
+
+    // if no winning word is available, choose a valid spell
+    for (int i = 0; i < validCount; i++)
+    {
+        chosenWords[validSpells[i]] = 1;
+        nextMoveIndex = validSpells[i] + 1;
+        return validSpells[i];
     }
+nextMoveIndex = validSpells[0] + 1;
+    return -1;
+}
+
 
 // int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int currentplayer, struct Trie *head)
 // {
