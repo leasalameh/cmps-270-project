@@ -540,7 +540,43 @@ int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 }
 
 int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
-{
+{ // keeping track of the next move 
+    static int nextMoveIndex=0;
+    // spells thet meet the criteria
+    int validSpelss[MAX_SPELLS];
+    int validCount =0;
+    for (int i=0; i <numberOfSpelss; i++){
+        if (spells[i][0] == lastChar && chosenWords[i] ==0){
+            validSpells[validCount++] = i;
+        }
+    }
+    if (validCount ==0){
+        // if no valid spell found 
+        int chosenIndex = nextMoveIndex % numberofSpells;
+        nextMoveIndex++:
+            return chosenIndex;
+    }
+    if (nextMoveIndex % 10 <8){ // bot's turn
+        int chosenIndex = validSpells[0];
+        for (int i =1; i <validCount ; i++){
+            if (strlen(spells[validSpells[i]]) > strlen (spells[chosenIndex])){
+                chosenIndex = validSPells[i];
+            }
+        }
+        nextMoveIndex ++;
+        return chosenIndex;
+    }
+    else {
+        // choose a spell for defense when not bot's turn
+        int chosenIndex = validSpell[0];
+        for (int i=1; i <validCount; i++){
+            if (strlen(spells[validSpells[i]]) < strlen(spells[chosenIndex])){
+                chosenIndex = validSpells[i];
+            }
+        }
+        nextMoveIndex ++:
+            return chosenIndex;
+    }
 }
 
 // int hardBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells, int currentplayer, struct Trie *head)
