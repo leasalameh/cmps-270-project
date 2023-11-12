@@ -230,7 +230,7 @@ int getSpellIndex(const char *spell, char spell[][MAX_SPELL_LENGTH], int numberO
     }
     return -1; // spell wasnt found 
 }
-}
+
 
 int main()
 {
@@ -291,7 +291,7 @@ int main()
                     scanf("%s", currentSpell);
                 // check if spell is valid 
                     while (!isSpellValid(currentSpell, spells, numberOfSpells) || chosenWords [getSpellIndex(currentSPell, spells, numberOfspells)] ==1){
-                        special_print("Invalid spell. Enter a valid spell: );
+                        special_print("Invalid spell. Enter a valid spell:" );
                             scanf("%s", currentSpell);
                         
                     }
@@ -540,13 +540,15 @@ int easyBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
 }
 
 int mediumBot(char lastChar, char spells[][MAX_SPELL_LENGTH], int numberOfSpells)
-{ // keeping track of the next move 
+{char winningWords[MAX_SPELLS][MAX_WORD_LENGTH];
+ int count =0;
+    // keeping track of the next move 
     static int nextMoveIndex=0;
     // spells thet meet the criteria
-    int validSpelss[MAX_SPELLS];
+    int validSpells[MAX_SPELLS];
     int validCount =0;
     
-    for (int i=0; i <numberOfSpelss; i++){
+    for (int i=0; i <numberOfSpells; i++){
         if (spells[i][0] == lastChar && chosenWords[i] ==0){
             validSpells[validCount++] = i;
         }
