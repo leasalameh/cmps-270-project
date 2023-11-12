@@ -300,9 +300,9 @@ int main()
                     // update lastChar for next turn (increases chances of winning)
                     lastChar = currentSpell [strlen(currentSpell) -1];}
                 else {
-                    int botSpellIndex = mediumBot(lastChar, spells, numberOfSpells);
+                    int botSpellIndex = mediumBot(lastChar, spells, numberOfSpells, chosenWords, winningWords, *count);
                     while (chosenWords[botSpellIndex] ==1){
-                        botSpellIndex = mediumBot(lastChar, spells, numberOfSpells);
+                        botSpellIndex = mediumBot(lastChar, spells, numberOfSpells, chosenWords, winningWords, *count);
                     }
                     // mark chosen word again 
                     chosenWords[botSpellIndex] = 1;
