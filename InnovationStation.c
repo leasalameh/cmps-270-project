@@ -301,7 +301,7 @@ HARD BOT: our hard bot has the winning move array of the medium bot, but it has 
         - if there is a winning word and player starts but winning word first letter does not match:
             choose a word that will result in having a winning word (force the move of the player)
     case 5:
-        - if player starts and no winning word,
+        - if player starts and there is no such word the bot can use to force the player to put a specific word, go back to evenOdd case
 
 */
 
